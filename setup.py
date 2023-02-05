@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name='mkdocs-statistics-plugin',
-    version='0.1.0',
+    version='0.1.1',
     author='TonyCrane',
     author_email='me@tonycrane.cc',
     description='A MkDocs plugin that generate statistic data of a site',
@@ -37,11 +37,15 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10'
     ],
-    packages=find_packages(exclude=['*.tests']),
     entry_points={
         'mkdocs.plugins': [
             'statistics = mkdocs_statistics_plugin.plugin:StatisticsPlugin'
         ]
     },
-    include_package_data=True
+    include_package_data=True,
+    package_data={
+        'mkdocs_statistics_plugin': [
+            'templates/*.html'
+        ]
+    }
 )

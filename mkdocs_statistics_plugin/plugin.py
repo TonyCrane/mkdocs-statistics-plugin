@@ -39,10 +39,10 @@ class StatisticsPlugin(BasePlugin):
     def on_config(self, config: config_options.Config, **kwargs) -> Dict[str, Any]:
         page_template = self.config.get("page_template")
         if page_template == "":
-            with open(TEMPLATE_DIR, 'r') as file:
+            with open(TEMPLATE_DIR, 'r', encoding='utf-8') as file:
                 self.template = file.read()
         else:
-            with open(config['docs_dir'] + '/' + page_template, 'r') as file:
+            with open(config['docs_dir'] + '/' + page_template, 'r', encoding='utf-8') as file:
                 self.template = file.read()
         return config
     

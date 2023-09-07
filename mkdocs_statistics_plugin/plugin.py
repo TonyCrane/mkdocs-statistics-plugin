@@ -149,8 +149,8 @@ class StatisticsPlugin(BasePlugin):
         return chinese, english, codes
     
     def _clean_markdown(self, markdown: str) -> Tuple[str, list]:
-        codes = re.findall(r'```[^\n].*?```', markdown, re.S)
-        markdown = re.sub(r'```[^\n].*?```', '', markdown, flags=re.DOTALL | re.MULTILINE)
+        codes = re.findall(r'(~~~[^\n].*?~~~|```[^\n].*?```)', markdown, re.S)
+        markdown = re.sub(r'(~~~[^\n].*?~~~|```[^\n].*?```)', '', markdown, flags=re.DOTALL | re.MULTILINE)
         markdown = re.sub(r'<!--.*?-->', '', markdown, flags=re.DOTALL | re.MULTILINE)
         markdown = markdown.replace('\t', '    ')
         markdown = re.sub(r'[ ]{2,}', '    ', markdown)

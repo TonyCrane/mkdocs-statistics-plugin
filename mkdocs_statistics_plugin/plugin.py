@@ -99,6 +99,9 @@ class StatisticsPlugin(BasePlugin):
         if self.config.get("page_statistics") == False:
             return markdown
 
+        if page.meta.get("hide") and "statistics" in page.meta["hide"]:
+            return markdown
+
         page_check_metadata = self.config.get("page_check_metadata")
         if page_check_metadata == "" or page.meta.get(page_check_metadata):
             code_lines = 0

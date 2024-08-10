@@ -151,8 +151,19 @@ class StatisticsPlugin(BasePlugin):
         english = " ".join(re.findall(r'[a-zA-Z0-9]*?(?![a-zA-Z0-9])', markdown))
         return chinese, english, codes
     
+    def _filter_out_diagrams(self, codes: list[str]) -> list[str]:
+        ret = []
+        ignore_langs = ["mermaid", "math"]
+        for code in codes:
+            res = re.match(r"(`{3,}|~{3,})(?P<lang>\w*)", code.splitlines()[0])
+            lang = res.group("lang") if res else ""
+            if lang not in ignore_langs:
+                ret.append(code)
+        return ret
+    
     def _clean_markdown(self, markdown: str) -> Tuple[str, list]:
         codes = re.findall(r'(~~~[^\n].*?~~~|```[^\n].*?```)', markdown, re.S)
+        codes = self._filter_out_diagrams(codes)
         markdown = re.sub(r'(~~~[^\n].*?~~~|```[^\n].*?```)', '', markdown, flags=re.DOTALL | re.MULTILINE)
         markdown = re.sub(r'<!--.*?-->', '', markdown, flags=re.DOTALL | re.MULTILINE)
         markdown = markdown.replace('\t', '    ')

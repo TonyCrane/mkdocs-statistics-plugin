@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name='mkdocs-statistics-plugin',
-    version='0.1.2',
+    version='0.1.3',
     author='TonyCrane',
     author_email='me@tonycrane.cc',
     description='A MkDocs plugin that generate statistic data of a site',

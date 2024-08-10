@@ -38,6 +38,7 @@ $ pip install . # or pip install -e .
 |`page_template`|str||单页统计信息模板相对路径（相对 docs）|
 |`words_per_minute`|int|`300`|每分钟预计阅读字数|
 |`codelines_per_minute`|int|`80`|每分钟预计阅读代码行数|
+|`ignore_languages`|list|`["mermaid", "math"]`|不计入代码行数的语言列表|
 
 ### 几种使用方式
 #### 全局统计页
@@ -76,7 +77,15 @@ plugins:
 ~~计划添加页面元信息选项来为单页设置特定的阅读时间。（咕咕咕）~~
 
 #### 字数统计细节
-本插件的字数统计细节为：一个英文单词（包括数字）算一个字，一个中文汉字算一个字，标点都不算字；代码块（带语言的三反引号语法）中所有内容都不计入字数，而是计入代码块行数统计。
+本插件的字数统计细节为：一个英文单词（包括数字）算一个字，一个中文汉字算一个字，标点都不算字；代码块（带语言的篱笆型语法）中所有内容都不计入字数，而是计入代码块行数统计，可以通过设置 `ignore_languages` 选项来指定不计入代码行数的语言列表（默认不计 `mermaid` 和 `math`），自定义配置写法如下：
+
+```yaml
+plugins:
+  - statistics:
+      ignore_languages:
+        - mermaid
+        - markdown
+```
 
 具体细节见 plugin.py 中的 \_clean\_markdown 方法。
 

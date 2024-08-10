@@ -28,7 +28,8 @@ class StatisticsPlugin(BasePlugin):
         ('page_read_time', config_options.Type(bool, default=True)),
         ('page_template', config_options.Type(str, default="")),
         ('words_per_minute', config_options.Type(int, default=300)),
-        ('codelines_per_minute', config_options.Type(int, default=80))
+        ('codelines_per_minute', config_options.Type(int, default=80)),
+        ('ignore_languages', config_options.Type(list, default=["mermaid", "math"]))
     )
 
     enabled = True
@@ -153,11 +154,10 @@ class StatisticsPlugin(BasePlugin):
     
     def _filter_out_diagrams(self, codes: list[str]) -> list[str]:
         ret = []
-        ignore_langs = ["mermaid", "math"]
         for code in codes:
             res = re.match(r"(`{3,}|~{3,})(?P<lang>\w*)", code.splitlines()[0])
             lang = res.group("lang") if res else ""
-            if lang not in ignore_langs:
+            if lang not in self.config.get("ignore_languages"):
                 ret.append(code)
         return ret
     

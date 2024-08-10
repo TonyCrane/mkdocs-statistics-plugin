@@ -113,7 +113,10 @@ class StatisticsPlugin(BasePlugin):
             lines = markdown.splitlines()
             h1 = -1
             for idx, line in enumerate(lines):
-                if re.match(r"\s*# ", line):
+                if re.match(r"\s*# ", line): # ATX syntax
+                    h1 = idx
+                    break
+                if re.match(r"=+\s*$", line) and idx > 0 and lines[idx - 1]: # Setext syntax
                     h1 = idx
                     break
             if self.config.get("page_read_time"):

@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import re
 import logging
@@ -39,6 +40,10 @@ class StatisticsPlugin(BasePlugin):
     words = 0
     codes = 0
 
+    is_serving = False
+    def on_startup(self, command, **kwargs):
+        self.is_serving = command == 'serve'
+
     def on_config(self, config: config_options.Config, **kwargs) -> Dict[str, Any]:
         page_template = self.config.get("page_template")
         if page_template == "":
@@ -53,23 +58,41 @@ class StatisticsPlugin(BasePlugin):
         include_path = self.config.get('include_path')
         exclude_path = self.config.get('exclude_path')
 
+        material_blog = config.get('plugins').get('material/blog')
+        if material_blog:
+            blog_config = material_blog.config
+            draft_always = blog_config.get('draft')
+            draft_on_serve = blog_config.get('draft_on_serve')
+            draft_if_future_date = blog_config.get('draft_if_future_date')
+
         for file in files.documentation_pages():
             src_path = file.src_path
+            
             if include_path and not re.match(include_path, src_path):
                 continue
             if exclude_path and re.match(exclude_path, src_path):
                 continue
+
+            with open(config['docs_dir'] + '/' + src_path, encoding='utf-8-sig', errors='strict') as f:
+                source = f.read()
+            markdown, meta = get_data(source)
+
+            post_date = meta.get('date')
+            if post_date and material_blog:  # date is require if it's a blog post
+                now = datetime.now()
+                is_draft = meta.get('draft', False) or (draft_if_future_date and post_date > now)
+                if draft_always:
+                    {}
+                elif not is_draft:
+                    {}
+                elif self.is_serving and draft_on_serve:
+                    {}
+                else: continue
+
             self.pages += 1
-            self._count_page(config['docs_dir'] + '/' + src_path)
+            self._words_count(markdown)
             
         return files
-
-    def _count_page(self, path: str) -> None:
-        with open(path, encoding='utf-8-sig', errors='strict') as f:
-            source = f.read()
-        markdown, _ = get_data(source)
-        self._words_count(markdown)
-        return
     
     def on_page_markdown(
         self, markdown: str, page: Page, config: config_options.Config, files, **kwargs

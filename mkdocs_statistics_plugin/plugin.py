@@ -55,6 +55,10 @@ class StatisticsPlugin(BasePlugin):
         return config
     
     def on_files(self, files: Files, *, config: config_options.Config) -> Optional[Files]:
+        self.pages = 0
+        self.words = 0
+        self.codes = 0
+
         include_path = self.config.get('include_path')
         exclude_path = self.config.get('exclude_path')
 

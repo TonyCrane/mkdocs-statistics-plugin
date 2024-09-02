@@ -39,6 +39,8 @@ $ pip install . # or pip install -e .
 |`words_per_minute`|int|`300`|每分钟预计阅读字数|
 |`codelines_per_minute`|int|`80`|每分钟预计阅读代码行数|
 |`ignore_languages`|list|`["mermaid", "math"]`|不计入代码行数的语言列表|
+|`include_path`|str|` `|只统计匹配的路径（正则，路径相对 docs，为空则不启用）|
+|`exclude_path`|str|` `|不统计匹配的路径（正则，路径相对 docs，为空则不启用）|
 
 ### 几种使用方式
 #### 全局统计页

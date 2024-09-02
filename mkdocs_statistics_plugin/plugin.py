@@ -29,7 +29,9 @@ class StatisticsPlugin(BasePlugin):
         ('page_template', config_options.Type(str, default="")),
         ('words_per_minute', config_options.Type(int, default=300)),
         ('codelines_per_minute', config_options.Type(int, default=80)),
-        ('ignore_languages', config_options.Type(list, default=["mermaid", "math"]))
+        ('ignore_languages', config_options.Type(list, default=["mermaid", "math"])),
+        ('include_path', config_options.Type(str, default="")),
+        ('exclude_path', config_options.Type(str, default="")),
     )
 
     enabled = True
@@ -48,9 +50,18 @@ class StatisticsPlugin(BasePlugin):
         return config
     
     def on_files(self, files: Files, *, config: config_options.Config) -> Optional[Files]:
-        self.pages = len([file.page for file in files.documentation_pages()])
+        include_path = self.config.get('include_path')
+        exclude_path = self.config.get('exclude_path')
+
         for file in files.documentation_pages():
-            self._count_page(config['docs_dir'] + '/' + file.src_path)
+            src_path = file.src_path
+            if include_path and not re.match(include_path, src_path):
+                continue
+            if exclude_path and re.match(exclude_path, src_path):
+                continue
+            self.pages += 1
+            self._count_page(config['docs_dir'] + '/' + src_path)
+            
         return files
 
     def _count_page(self, path: str) -> None:

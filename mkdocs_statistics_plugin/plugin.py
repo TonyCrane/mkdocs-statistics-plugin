@@ -130,6 +130,8 @@ class StatisticsPlugin(BasePlugin):
                     code_lines = code_lines,
                     read_time = read_time
                 )
+
+                page.meta["statistics_page_read_time"] = read_time
             else:
                 page_statistics_content = Template(self.template).render(
                     words = words,
@@ -137,6 +139,10 @@ class StatisticsPlugin(BasePlugin):
                 )
             lines.insert(h1 + 1, page_statistics_content)
             markdown = "\n".join(lines)
+
+            # Add to page meta information, for developers
+            page.meta["statistics_page_words"] = words
+            page.meta["statistics_page_codes_lines"] = code_lines
 
         return markdown
 

@@ -89,5 +89,13 @@ plugins:
 
 具体细节见 plugin.py 中的 \_clean\_markdown 方法。
 
+#### 主题可用变量
+如果需要在模板中包含本页的统计信息或希望对统计信息进行更多控制，则可以在主题（模板）中使用保存于 `page.meta` 中的变量（仅在本页开启统计时可用）。
+| 变量 | 描述 |
+| --------------------------------------- | ---------- |
+| `page.meta.statistics_page_words`       | 本页预估字数 |
+| `page.meta.statistics_page_codes_lines` | 本页代码行数 |
+| `page.meta.statistics_page_read_time`   | 本页预估阅读时间（仅在本页开启统计阅读时间时可用） |
+
 ## 开发
 可能很不稳定（反正至少我能跑起来），有任何问题欢迎 issue 提出。同时页欢迎任何 PR，尽管提就好。

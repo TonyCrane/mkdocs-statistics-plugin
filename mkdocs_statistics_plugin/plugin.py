@@ -136,6 +136,14 @@ class StatisticsPlugin(BasePlugin):
 
         if page.meta.get("hide") and "statistics" in page.meta["hide"]:
             return markdown
+        
+        include_path = self.config.get('include_path')
+        exclude_path = self.config.get('exclude_path')
+        src_path = page.file.src_path
+        if include_path and not re.match(include_path, src_path):
+            return markdown
+        if exclude_path and re.match(exclude_path, src_path):
+            return markdown
 
         page_check_metadata = self.config.get("page_check_metadata")
         if page_check_metadata == "" or page.meta.get(page_check_metadata):

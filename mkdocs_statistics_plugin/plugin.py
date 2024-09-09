@@ -1,8 +1,7 @@
-from datetime import datetime
 import os
-import math
 import re
 import logging
+from datetime import datetime
 
 from jinja2 import Template
 

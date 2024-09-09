@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import math
 import re
 import logging
 
@@ -162,7 +163,7 @@ class StatisticsPlugin(BasePlugin):
         page_check_metadata = self.config.get("page_check_metadata")
         if page_check_metadata == "" or page.meta.get(page_check_metadata):
             code_lines = 0
-            images = len(re.findall("<img.*>", markdown)) + len(re.findall(r"!\[.*\]\(.*\)", markdown))
+            images = len(re.findall("<img.*>", markdown)) + len(re.findall(r'!\[[^\]]*\]\([^)]*\)', markdown))
             chinese, english, codes = self._split_markdown(markdown)
             words = len(chinese) + len(english.split())
             for code in codes:
@@ -177,29 +178,23 @@ class StatisticsPlugin(BasePlugin):
                 if re.match(r"=+\s*$", line) and idx > 0 and lines[idx - 1]: # Setext syntax
                     h1 = idx
                     break
-            if self.config.get("page_read_time"):
+            try:
                 read_time = round(
                     words / self.config.get("words_per_minute") + \
                     code_lines / self.config.get("codelines_per_minute")
                 )
-                page_statistics_content = Template(self.template).render(
-                    words = words,
-                    code_lines = code_lines,
-                    read_time = read_time,
-                    images = images,
-                    page_read_time = True,
-                    page_images = self.config.get("page_images"),
-                )
+            except ZeroDivisionError:
+                read_time = math.inf
 
-                page.meta["statistics_page_read_time"] = read_time
-            else:
-                page_statistics_content = Template(self.template).render(
-                    words = words,
-                    code_lines = code_lines,
-                    images = images,
-                    page_read_time = False,
-                    page_images = self.config.get("page_images"),
-                )
+            page_statistics_content = Template(self.template).render(
+                words = words,
+                code_lines = code_lines,
+                images = images,
+                read_time = read_time,
+                page_read_time = self.config.get("page_read_time"),
+                page_images = self.config.get("page_images"),
+            )
+
             lines.insert(h1 + 1, page_statistics_content)
             markdown = "\n".join(lines)
 
@@ -207,11 +202,12 @@ class StatisticsPlugin(BasePlugin):
             page.meta["statistics_page_words"] = words
             page.meta["statistics_page_codes_lines"] = code_lines
             page.meta["statistics_page_images"] = images
+            page.meta["statistics_page_read_time"] = read_time
 
         return markdown
 
     def _words_count(self, markdown: str) -> None:
-        self.images += len(re.findall("<img.*>", markdown)) + len(re.findall(r"!\[.*\]\(.*\)", markdown))
+        self.images += len(re.findall("<img.*>", markdown)) + len(re.findall(r'!\[[^\]]*\]\([^)]*\)', markdown))
         chinese, english, codes = self._split_markdown(markdown)
         self.words += len(chinese) + len(english.split())
         for code in codes:

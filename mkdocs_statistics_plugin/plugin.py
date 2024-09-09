@@ -1,7 +1,7 @@
-from datetime import datetime
 import os
 import re
 import logging
+from datetime import datetime
 
 from jinja2 import Template
 
@@ -24,9 +24,11 @@ class StatisticsPlugin(BasePlugin):
         ('pages_placeholder', config_options.Type(str, default=r'\{\{\s*pages\s*\}\}')),
         ('words_placeholder', config_options.Type(str, default=r'\{\{\s*words\s*\}\}')),
         ('codes_placeholder', config_options.Type(str, default=r'\{\{\s*codes\s*\}\}')),
+        ('images_placeholder', config_options.Type(str, default=r'\{\{\s*images\s*\}\}')),
         ('page_statistics', config_options.Type(bool, default=True)),
         ('page_check_metadata', config_options.Type(str, default="")),
         ('page_read_time', config_options.Type(bool, default=True)),
+        ('page_images', config_options.Type(bool, default=True)),
         ('page_template', config_options.Type(str, default="")),
         ('words_per_minute', config_options.Type(int, default=300)),
         ('codelines_per_minute', config_options.Type(int, default=80)),
@@ -58,6 +60,7 @@ class StatisticsPlugin(BasePlugin):
         self.pages = 0
         self.words = 0
         self.codes = 0
+        self.images = 0
 
         include_path = self.config.get('include_path')
         exclude_path = self.config.get('exclude_path')
@@ -112,7 +115,7 @@ class StatisticsPlugin(BasePlugin):
         
         if page.meta.get("statistics"):
 
-            log.info(f"pages: {self.pages}, words: {self.words}, codes: {self.codes}")
+            log.info(f"pages: {self.pages}, words: {self.words}, codes: {self.codes}, images: {self.images}")
 
             markdown = re.sub(
                 self.config.get("pages_placeholder"),
@@ -135,6 +138,13 @@ class StatisticsPlugin(BasePlugin):
                 flags=re.IGNORECASE,
             )
 
+            markdown = re.sub(
+                self.config.get("images_placeholder"),
+                str(self.images),
+                markdown,
+                flags=re.IGNORECASE,
+            )
+
         if self.config.get("page_statistics") == False:
             return markdown
 
@@ -152,6 +162,7 @@ class StatisticsPlugin(BasePlugin):
         page_check_metadata = self.config.get("page_check_metadata")
         if page_check_metadata == "" or page.meta.get(page_check_metadata):
             code_lines = 0
+            images = len(re.findall("<img.*>", markdown)) + len(re.findall(r'!\[[^\]]*\]\([^)]*\)', markdown))
             chinese, english, codes = self._split_markdown(markdown)
             words = len(chinese) + len(english.split())
             for code in codes:
@@ -166,33 +177,36 @@ class StatisticsPlugin(BasePlugin):
                 if re.match(r"=+\s*$", line) and idx > 0 and lines[idx - 1]: # Setext syntax
                     h1 = idx
                     break
-            if self.config.get("page_read_time"):
+            try:
                 read_time = round(
                     words / self.config.get("words_per_minute") + \
                     code_lines / self.config.get("codelines_per_minute")
                 )
-                page_statistics_content = Template(self.template).render(
-                    words = words,
-                    code_lines = code_lines,
-                    read_time = read_time
-                )
+            except ZeroDivisionError:
+                read_time = 0
 
-                page.meta["statistics_page_read_time"] = read_time
-            else:
-                page_statistics_content = Template(self.template).render(
-                    words = words,
-                    code_lines = code_lines,
-                )
+            page_statistics_content = Template(self.template).render(
+                words = words,
+                code_lines = code_lines,
+                images = images,
+                read_time = read_time,
+                page_read_time = self.config.get("page_read_time"),
+                page_images = self.config.get("page_images"),
+            )
+
             lines.insert(h1 + 1, page_statistics_content)
             markdown = "\n".join(lines)
 
             # Add to page meta information, for developers
             page.meta["statistics_page_words"] = words
             page.meta["statistics_page_codes_lines"] = code_lines
+            page.meta["statistics_page_images"] = images
+            page.meta["statistics_page_read_time"] = read_time
 
         return markdown
 
     def _words_count(self, markdown: str) -> None:
+        self.images += len(re.findall("<img.*>", markdown)) + len(re.findall(r'!\[[^\]]*\]\([^)]*\)', markdown))
         chinese, english, codes = self._split_markdown(markdown)
         self.words += len(chinese) + len(english.split())
         for code in codes:

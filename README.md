@@ -1,6 +1,6 @@
 # mkdocs-statistics-plugin
 
-一个用于 mkdocs 文档统计的插件，包括全局页面数、字数、代码块行数，单页字数、代码行数、预计阅读时间等。
+一个用于 mkdocs 文档统计的插件，包括全局页面数、字数、代码块行数，单页字数、代码行数、图片张数以及预计阅读时间等。
 
 预览：<https://note.tonycrane.cc/>（只有带评论的页面有单页统计）
 
@@ -32,9 +32,11 @@ $ pip install . # or pip install -e .
 |`pages_placeholder`|str|`\{\{\s*pages\s*\}\}`|全局统计页面中页面数占位符（正则）|
 |`words_placeholder`|str|`\{\{\s*words\s*\}\}`|全局统计页面中字数占位符（正则）|
 |`codes_placeholder`|str|`\{\{\s*codes\s*\}\}`|全局统计页面中代码行数占位符（正则）|
+|`images_placeholder`|str|`\{\{\s*images\s*\}\}`|全局统计页面中图片张数占位符（正则）|
 |`page_statistics`|bool|`True`|是否在单页中显示统计信息|
 |`page_check_metadata`|str||如果为空，则所有页面都显示；否则包含指定 metadata 才显示单页统计信息|
 |`page_read_time`|bool|`True`|是否显示单页预计阅读时间|
+|`page_images`|bool|`True`|是否显示单页图片张数|
 |`page_template`|str||单页统计信息模板相对路径（相对 docs）|
 |`words_per_minute`|int|`300`|每分钟预计阅读字数|
 |`codelines_per_minute`|int|`80`|每分钟预计阅读代码行数|
@@ -52,7 +54,7 @@ statistics: True
 ```
 然后在该页中需要的部分添加占位符，例如：
 ```markdown
-本站共有 {{ pages }} 个页面，{{ words }} 个字，{{ codes }} 行代码。
+本站共有 {{ pages }} 个页面，{{ words }} 个字，{{ codes }} 行代码，{{ images }} 张图片。
 ```
 
 #### 单页统计
@@ -67,14 +69,15 @@ plugins:
 
 ### 高级用法
 #### 自定义单页统计模板
-可以通过 `page_template` 选项指定单页统计模板的相对路径（相对 docs）。这个模板会被插入到 markdown 源码的一级标题下方，会传入 `words` `code_lines` `read_time`（可选）三个模板参数。
+可以通过 `page_template` 选项指定单页统计模板的相对路径（相对 docs）。这个模板会被插入到 markdown 源码的一级标题下方，会传入 `words` `code_lines` `images`  `page_images` `read_time` `page_read_time` 六个模板参数。
 
 自定义的话可以参考提供的模板。
 
 #### 阅读时间
 可以通过 `page_read_time` 选项控制是否显示单页预计阅读时间。默认开启。
+可以通过 `page_images` 选项控制是否显示单页图片张数。默认开启。
 
-阅读时间的计算方式是分别计算字数和代码行数的阅读时间，然后取二者之和。可以通过 `words_per_minute` 和 `codelines_per_minute` 选项分别设置每分钟预计阅读字数和代码行数。默认情况下分别为 300 和 80，对于技术类文章这样的设置基本合理，对于其他类型例如文学类文章每分钟阅读字数应该提高到 400~600 左右较为合理。
+阅读时间的计算方式是分别计算字数和代码行数的阅读时间，然后取二者之和，图片不计入阅读时间。可以通过 `words_per_minute` 和 `codelines_per_minute` 选项分别设置每分钟预计阅读字数和代码行数。默认情况下分别为 300 和 80，对于技术类文章这样的设置基本合理，对于其他类型例如文学类文章每分钟阅读字数应该提高到 400~600 左右较为合理。
 
 ~~计划添加页面元信息选项来为单页设置特定的阅读时间。（咕咕咕）~~
 
@@ -92,12 +95,13 @@ plugins:
 具体细节见 plugin.py 中的 \_clean\_markdown 方法。
 
 #### 主题可用变量
-如果需要在模板中包含本页的统计信息或希望对统计信息进行更多控制，则可以在主题（模板）中使用保存于 `page.meta` 中的变量（仅在本页开启统计时可用）。
+如果需要在模板中包含本页的统计信息或希望对统计信息进行更多控制，则可以在主题（模板）中使用保存于 `page.meta` 中的变量。
 | 变量 | 描述 |
 | --------------------------------------- | ---------- |
 | `page.meta.statistics_page_words`       | 本页预估字数 |
 | `page.meta.statistics_page_codes_lines` | 本页代码行数 |
-| `page.meta.statistics_page_read_time`   | 本页预估阅读时间（仅在本页开启统计阅读时间时可用） |
+| `page.meta.statistics_page_images`      | 本页图片张数 |
+| `page.meta.statistics_page_read_time`   | 本页预估阅读时间 |
 
 ## 开发
 可能很不稳定（反正至少我能跑起来），有任何问题欢迎 issue 提出。同时页欢迎任何 PR，尽管提就好。

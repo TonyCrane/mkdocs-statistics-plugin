@@ -32,6 +32,7 @@ $ pip install . # or pip install -e .
 |`pages_placeholder`|str|`\{\{\s*pages\s*\}\}`|全局统计页面中页面数占位符（正则）|
 |`words_placeholder`|str|`\{\{\s*words\s*\}\}`|全局统计页面中字数占位符（正则）|
 |`codes_placeholder`|str|`\{\{\s*codes\s*\}\}`|全局统计页面中代码行数占位符（正则）|
+|`images_placeholder`|str|`\{\{\s*images\s*\}\}`|全局统计页面中图片张数占位符（正则）|
 |`page_statistics`|bool|`True`|是否在单页中显示统计信息|
 |`page_check_metadata`|str||如果为空，则所有页面都显示；否则包含指定 metadata 才显示单页统计信息|
 |`page_read_time`|bool|`True`|是否显示单页预计阅读时间|

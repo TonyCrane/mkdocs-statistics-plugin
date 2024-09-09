@@ -184,7 +184,7 @@ class StatisticsPlugin(BasePlugin):
                     code_lines / self.config.get("codelines_per_minute")
                 )
             except ZeroDivisionError:
-                read_time = math.inf
+                read_time = 0
 
             page_statistics_content = Template(self.template).render(
                 words = words,

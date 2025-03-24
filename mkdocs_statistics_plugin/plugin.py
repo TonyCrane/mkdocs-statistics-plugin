@@ -192,6 +192,7 @@ class StatisticsPlugin(BasePlugin):
                 read_time = read_time,
                 page_read_time = self.config.get("page_read_time"),
                 page_images = self.config.get("page_images"),
+                config = config,
             )
 
             lines.insert(h1 + 1, page_statistics_content)
